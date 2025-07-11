@@ -1,3 +1,5 @@
+![Go Mediator Banner](pkg/assets/golang-mediator.png)
+
 # Golang Mediator
 
 A lightweight and extensible **CQRS Mediator library for Golang** with support for:

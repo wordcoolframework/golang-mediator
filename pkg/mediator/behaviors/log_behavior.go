@@ -11,7 +11,7 @@ func LogBehavior(req contracts.Request, next func(request contracts.Request) (an
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	} else {
-		fmt.Printf("Result: %#v\n", res)
+		fmt.Printf("Result : %#v\n", res)
 	}
 	return res, err
 }

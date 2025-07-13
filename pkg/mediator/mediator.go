@@ -1,6 +1,7 @@
 package mediator
 
 import (
+	"github.com/wordcoolframework/golang-mediator/pkg/mediator/container"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/contracts"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/exceptions"
 	"reflect"
@@ -9,12 +10,14 @@ import (
 type Mediator struct {
 	handlers  map[string]interface{}
 	behaviors []Behavior
+	container *container.Container
 }
 
 func New() *Mediator {
 	return &Mediator{
 		handlers:  make(map[string]interface{}),
 		behaviors: []Behavior{},
+		container: container.NewContainer(),
 	}
 }
 
@@ -27,8 +30,21 @@ func (m *Mediator) Register(handler interface{}) {
 	if t.Kind() != reflect.Ptr {
 		panic("handler must be a pointer")
 	}
+
+	handlerValue := reflect.ValueOf(handler).Elem()
+	for i := 0; i < handlerValue.NumField(); i++ {
+		field := handlerValue.Type().Field(i)
+		if dep, ok := m.container.Resolve(field.Type); ok {
+			handlerValue.Field(i).Set(reflect.ValueOf(dep))
+		}
+	}
+
 	name := t.Elem().Name()
 	m.handlers[name] = handler
+}
+
+func (m *Mediator) Provide(dep interface{}) {
+	m.container.Provide(dep)
 }
 
 func (m *Mediator) Send(req contracts.Request) (any, error) {

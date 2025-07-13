@@ -21,6 +21,10 @@ func (b *Builder) Register(handler interface{}) *Builder {
 	b.mediator.Register(handler)
 	return b
 }
+func (b *Builder) Provide(dep interface{}) *Builder {
+	b.mediator.Provide(dep)
+	return b
+}
 
 func (b *Builder) Build() *mediator.Mediator {
 	return b.mediator

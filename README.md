@@ -139,6 +139,61 @@ m := builders.NewBuilder().
     Build()
 ```
 
+### 7. Event (Handle Events With EventHandlers)
+
+```go
+package Events
+
+type UserCreatedEvent struct {
+	UserID uint
+	Email  string
+}
+
+func (e UserCreatedEvent) EventName() string {
+	return "UserCreatedEvent"
+}
+
+
+package EventHandlers
+
+type UserCreatedHandler struct{}
+
+func (h *UserCreatedHandler) Handle(e contracts.Event) error {
+	ev := e.(Events.UserCreatedEvent)
+	fmt.Println("Send to Broker:", ev.UserID, ev.Email)
+	return nil
+}
+
+package main
+
+// use RegisterEventHandler(Events.UserCreatedEvent{}, &EventHandlers.UserCreatedHandler{}).
+
+m := builders.NewBuilder().
+UseBehavior(behaviors.LogBehavior).
+Register(&QueryHandlers.GetUserQueryHandler{}).
+RegisterEventHandler(Events.UserCreatedEvent{}, &EventHandlers.UserCreatedHandler{}).
+Provide(&Services.UserService{}).
+Build()
+
+app.Get("/user/:id", func(c *fiber.Ctx) error {
+
+	id, _ := strconv.Atoi(c.Params("id"))
+	query := Queries.GetUserQuery{ID: uint(id)}
+
+	res, err := m.Send(query)
+
+	ev := Events.UserCreatedEvent{UserID: 10, Email: "arash@gmail.com"}
+	m.PublishEvent(ev)
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	return c.JSON(res)
+})
+
+```
+
 ✅ Features
 * CQRS Pattern
 

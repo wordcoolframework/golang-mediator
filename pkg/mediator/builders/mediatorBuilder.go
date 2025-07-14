@@ -1,6 +1,9 @@
 package builders
 
-import "github.com/wordcoolframework/golang-mediator/pkg/mediator"
+import (
+	"github.com/wordcoolframework/golang-mediator/pkg/mediator"
+	"github.com/wordcoolframework/golang-mediator/pkg/mediator/contracts"
+)
 
 type Builder struct {
 	mediator *mediator.Mediator
@@ -21,6 +24,17 @@ func (b *Builder) Register(handler interface{}) *Builder {
 	b.mediator.Register(handler)
 	return b
 }
+
+func (b *Builder) RegisterEventHandler(event contracts.Event, handler contracts.IEventHandler) *Builder {
+	b.mediator.RegisterEventHandler(event, handler)
+	return b
+}
+
+func (b *Builder) PublishEvent(event contracts.Event) *Builder {
+	b.mediator.PublishEvent(event)
+	return b
+}
+
 func (b *Builder) Provide(dep interface{}) *Builder {
 	b.mediator.Provide(dep)
 	return b

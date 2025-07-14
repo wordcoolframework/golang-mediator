@@ -3,6 +3,7 @@ package mediator
 import (
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/container"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/contracts"
+	"github.com/wordcoolframework/golang-mediator/pkg/mediator/events"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/exceptions"
 	"reflect"
 )
@@ -11,6 +12,7 @@ type Mediator struct {
 	handlers  map[string]interface{}
 	behaviors []Behavior
 	container *container.Container
+	eventBus  *events.EventBus
 }
 
 func New() *Mediator {
@@ -18,7 +20,16 @@ func New() *Mediator {
 		handlers:  make(map[string]interface{}),
 		behaviors: []Behavior{},
 		container: container.NewContainer(),
+		eventBus:  events.NewEventBus(),
 	}
+}
+
+func (m *Mediator) RegisterEventHandler(event contracts.Event, handler contracts.IEventHandler) {
+	m.eventBus.RegisterEventHandler(event, handler)
+}
+
+func (m *Mediator) PublishEvent(event contracts.Event) {
+	m.eventBus.Publish(event)
 }
 
 func (m *Mediator) UseBehavior(b Behavior) {

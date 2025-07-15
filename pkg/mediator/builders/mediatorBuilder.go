@@ -35,6 +35,19 @@ func (b *Builder) PublishEvent(event contracts.Event) *Builder {
 	return b
 }
 
+func (b *Builder) UseRabbitMQ(url string) *Builder {
+	err := b.mediator.UseRabbitMQ(url)
+	if err != nil {
+		return nil
+	}
+	return b
+}
+
+func (b *Builder) PublishEventToQueue(event contracts.Event) *Builder {
+	b.mediator.PublishEvent(event)
+	return b
+}
+
 func (b *Builder) Provide(dep interface{}) *Builder {
 	b.mediator.Provide(dep)
 	return b

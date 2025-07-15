@@ -194,6 +194,45 @@ app.Get("/user/:id", func(c *fiber.Ctx) error {
 
 ```
 
+### 7. RabbitMq (Publish Data To Message Broker)
+
+```go
+package main
+
+// use | UseRabbitMQ("amqp://guest:guest@localhost:5672/").
+// publish data | errPublishToQueue := m.PublishEventToQueue(useEvent)
+
+m := builders.NewBuilder().
+    UseBehavior(behaviors.LogBehavior).
+    Register(&QueryHandlers.GetUserQueryHandler{}).
+    RegisterEventHandler(Events.UserCreatedEvent{}, &EventHandlers.UserCreatedHandler{}).
+    Provide(&Services.UserService{}).
+    UseRabbitMQ("amqp://guest:guest@localhost:5672/").
+    Build()
+
+app.Get("/user/:id", func(c *fiber.Ctx) error {
+
+	id, _ := strconv.Atoi(c.Params("id"))
+	query := Queries.GetUserQuery{ID: uint(id)}
+
+	res, err := m.Send(query)
+
+	useEvent := Events.UserCreatedEvent{UserID: 10, Email: "arash@gmail.com"}
+	errPublishToQueue := m.PublishEventToQueue(useEvent)
+
+	if errPublishToQueue != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	return c.JSON(res)
+})
+
+app.Listen(":3000")
+```
 ✅ Features
 * CQRS Pattern
 

@@ -1,18 +1,21 @@
 package mediator
 
 import (
+	"errors"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/container"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/contracts"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/events"
 	"github.com/wordcoolframework/golang-mediator/pkg/mediator/exceptions"
+	"github.com/wordcoolframework/golang-mediator/pkg/mediator/rabbitmq"
 	"reflect"
 )
 
 type Mediator struct {
-	handlers  map[string]interface{}
-	behaviors []Behavior
-	container *container.Container
-	eventBus  *events.EventBus
+	handlers       map[string]interface{}
+	behaviors      []Behavior
+	container      *container.Container
+	eventBus       *events.EventBus
+	rabbitProducer *rabbitmq.Producer
 }
 
 func New() *Mediator {
@@ -34,6 +37,15 @@ func (m *Mediator) PublishEvent(event contracts.Event) {
 
 func (m *Mediator) UseBehavior(b Behavior) {
 	m.behaviors = append(m.behaviors, b)
+}
+
+func (m *Mediator) UseRabbitMQ(url string) error {
+	producer, err := rabbitmq.NewProducer(rabbitmq.Config{URL: url})
+	if err != nil {
+		return err
+	}
+	m.rabbitProducer = producer
+	return nil
 }
 
 func (m *Mediator) Register(handler interface{}) {
@@ -87,6 +99,14 @@ func (m *Mediator) Send(req contracts.Request) (any, error) {
 	}
 
 	return m.runBehaviors(req, call)
+}
+
+func (m *Mediator) PublishEventToQueue(event contracts.Event) error {
+	if m.rabbitProducer == nil {
+		return errors.New("rabbitmq not configured")
+	}
+	queueName := event.EventName()
+	return m.rabbitProducer.Publish(queueName, event)
 }
 
 func (m *Mediator) runBehaviors(req contracts.Request, final func(request contracts.Request) (any, error)) (any, error) {

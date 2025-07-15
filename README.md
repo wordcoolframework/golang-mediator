@@ -1,14 +1,40 @@
 ![Go Mediator Banner](pkg/assets/golang-mediator.png)
 
-# Golang Mediator
+# Golang Mediator - CQRS Pattern Implementation
 
-A lightweight and extensible **CQRS Mediator library for Golang** with support for:
+Overview
+
 - ✅ Auto-discovery of handlers based on naming convention
-- ✅ Behaviors (like Logging, Caching, Validation)
-- ✅ Command/Query separation
-- ✅ Plug-and-play handler registration
+
+- ✅ Behavior pipeline (similar to middleware)
+
+- ✅ Command/Query separation (CQRS pattern)
+
+- ✅ Dependency Injection support
+
+- ✅ Event handling system
+
+- ✅ RabbitMQ integration for event publishing
+
+- ✅ Clean architecture
+
+- ✅ Simple and testable design
+
+- ✅ Chainable builder pattern for configuration
 
 ---
+
+### simple Project Structure
+```
+/app
+  /Commands
+  /Queries
+  /CommandHandlers
+  /QueryHandlers
+  /Events
+  /EventHandlers
+  /Services
+```
 
 ## 📦 Installation
 
@@ -169,11 +195,11 @@ package main
 // use RegisterEventHandler(Events.UserCreatedEvent{}, &EventHandlers.UserCreatedHandler{}).
 
 m := builders.NewBuilder().
-UseBehavior(behaviors.LogBehavior).
-Register(&QueryHandlers.GetUserQueryHandler{}).
-RegisterEventHandler(Events.UserCreatedEvent{}, &EventHandlers.UserCreatedHandler{}).
-Provide(&Services.UserService{}).
-Build()
+    UseBehavior(behaviors.LogBehavior).
+    Register(&QueryHandlers.GetUserQueryHandler{}).
+    RegisterEventHandler(Events.UserCreatedEvent{}, &EventHandlers.UserCreatedHandler{}).
+    Provide(&Services.UserService{}).
+    Build()
 
 app.Get("/user/:id", func(c *fiber.Ctx) error {
 

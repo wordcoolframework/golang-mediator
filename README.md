@@ -259,14 +259,6 @@ app.Get("/user/:id", func(c *fiber.Ctx) error {
 
 app.Listen(":3000")
 ```
-✅ Features
-* CQRS Pattern
 
-* No switch/case logic
-
-* Simple and testable
-
-* Chainable Behaviors like Middleware
-
-* Auto-discovery by name
-
+## Contributing
+Contributions are welcome! Please open an issue or submit a pull request.

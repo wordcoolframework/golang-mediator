@@ -10,12 +10,15 @@ import (
 	"reflect"
 )
 
+type BehaviorFunc func(req contracts.Request, next func(req contracts.Request) (any, error)) (any, error)
+
 type Mediator struct {
 	handlers       map[string]interface{}
 	behaviors      []Behavior
 	container      *container.Container
 	eventBus       *events.EventBus
 	rabbitProducer *rabbitmq.Producer
+	pipeline       []BehaviorFunc
 }
 
 func New() *Mediator {
@@ -35,8 +38,8 @@ func (m *Mediator) PublishEvent(event contracts.Event) {
 	m.eventBus.Publish(event)
 }
 
-func (m *Mediator) UseBehavior(b Behavior) {
-	m.behaviors = append(m.behaviors, b)
+func (m *Mediator) UseBehavior(b BehaviorFunc) {
+	m.pipeline = append(m.pipeline, b)
 }
 
 func (m *Mediator) UseRabbitMQ(url string) error {

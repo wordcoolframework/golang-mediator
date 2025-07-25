@@ -15,7 +15,7 @@ func NewBuilder() *Builder {
 	}
 }
 
-func (b *Builder) UseBehavior(behavior mediator.Behavior) *Builder {
+func (b *Builder) UseBehavior(behavior mediator.BehaviorFunc) *Builder {
 	b.mediator.UseBehavior(behavior)
 	return b
 }
